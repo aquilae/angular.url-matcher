@@ -1,0 +1,72 @@
+<!doctype html>
+<html>
+    <head>
+        <title>example</title>
+        <script type="text/javascript" src="http://code.angularjs.org/snapshot/angular.js"></script>
+        <script type="text/javascript" src="http://code.angularjs.org/snapshot/angular-route.js"></script>
+        <script type="text/javascript" src="/dist/angular.url_matcher.js"></script>
+    </head>
+    <body ng-app="app">
+        <div ng-controller="suppliersList">
+            <h3>I am {{ iam }}</h3>
+            <div><a href="{{ link }}">{{ link }}</a></div>
+            <div ng-controller="accountRegister">
+                <h4>I am {{ iam }}</h4>
+                <div><a href="{{ link }}">{{ link }}</a></div>
+                <div ng-controller="suppliersList">
+                    <h5>I am {{ iam }}</h5>
+                    <div><a href="{{ link }}">{{ link }}</a></div>
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+            (function () {
+                angular
+                    .module('app', ['aq.urlMatcher'], function ($locationProvider) {
+                        $locationProvider.html5Mode(true);
+                    })
+                    .controller('suppliersList', function suppliersList($scope, $urlMatcher, $location) {
+                        $scope.iam = 'simple suppliers list';
+                        $scope.link = '/suppliers/list/mode/ord-dir/page';
+                        $urlMatcher.map(
+                            'suppliers/list/{mode}/{ord=t}-{dir=auto}/{page}',
+                            function ($tokens, $build) {
+                                $scope.iam = 'tough supplier list: ' + JSON.stringify($tokens);
+                                for (var key in $tokens) {
+                                    if ($tokens.hasOwnProperty(key)) {
+                                        $tokens[key] = '[' + $tokens[key] + ']';
+                                    }
+                                }
+                                $scope.link = $build($tokens);
+                            },
+                            function ($build) {
+                                $scope.iam = 'simple suppliers list';
+                                $scope.link = $build({ mode: 'mode', ord: 'ord', dir: 'dir', page: 'page' });
+                            }
+                        );
+                    })
+                    .controller('accountRegister', function accountRegister($scope, $urlMatcher) {
+                        $scope.iam = 'simple account register';
+                        $scope.link = '/account/register/who';
+                        $urlMatcher.map(
+                            'account/register/{who}',
+                            function ($tokens, $build) {
+                                $scope.iam = 'tough account register: ' + JSON.stringify($tokens);
+                                for (var key in $tokens) {
+                                    if ($tokens.hasOwnProperty(key)) {
+                                        $tokens[key] = '[' + $tokens[key] + ']';
+                                    }
+                                }
+                                $scope.link = $build($tokens);
+                            },
+                            function ($build) {
+                                $scope.iam = 'simple account register';
+                                $scope.link = $build({ who: 'who' });
+                            }
+                        );
+                    });
+            })();
+        </script>
+    </body>
+</html>
